@@ -34,3 +34,25 @@ Build and deploy a web application which lists all the pilots who recently viola
 - Immediately show the information from the last 10 minutes to anyone opening the application
 - Not require the user to manually refresh the view to see up-to-date information
 
+## Introduction
+
+![app-example](public/example_ss.png)
+
+<p>The app displays the drones currently in the area and the NDZ perimeter.</p>  
+<p>If a drone crosses into the NDZ perimeter The app will add the information of the pilot and the drone to the NDZ violators list.</p>
+<p>The app will display realtime data received from the backend</p>
+
+
+## Built with
+
+- React.js
+- Node.js
+- Express.js
+- Socket.io
+- Mongoose
+
+## Dependencies
+- dotenv
+- bootstrap
+- axios
+- fast-xml-parser
