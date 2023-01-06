@@ -33,7 +33,7 @@ function ViolatorsList(props){
 
     return (
         <div>
-            <h1>NDZ Violators</h1>
+            <h1>NDZ Violations in the past 10 minutes</h1>
             <div style={{overflowY: 'scroll'}}>
                 <Table striped bordered hover variant="dark">
                     <thead>
@@ -48,8 +48,9 @@ function ViolatorsList(props){
                         <th>Phone number</th>
                 </tr>
                 </thead>
-                {generateTable}
+                    {generateTable}
             </Table>
+                {props.violators.length > 0 ? <></> : <h4>Connecting...</h4>}
             </div>
         </div>
     )

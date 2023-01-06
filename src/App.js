@@ -23,6 +23,10 @@ const App = () => {
     }, []);
   return (
     <div className="App">
+        <div className='credits' style={{textAlign: 'left', marginLeft: '15px', marginTop: '15px'}}>
+            <h5>Author: Teemu Tallskog</h5>
+            <h8>Assignment: <a href='https://assignments.reaktor.com/birdnest/'>https://assignments.reaktor.com/birdnest/</a></h8>
+        </div>
         <Radar drones={drones}/>
         <ViolatorsList violators={violators}/>
     </div>

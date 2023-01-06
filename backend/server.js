@@ -9,7 +9,11 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 const server = http.createServer(app);
 
-const io = socketIo(server);
+const io = socketIo(server, {
+    cors: {
+        origin: "*",
+    }
+});
 
 io.on('connection',(socket)=>{
     console.log('client connected: ', socket.id);
@@ -28,26 +32,23 @@ let prevClientCount = 1;
 let pauseInTime = null;
 setInterval(async ()=>{
     if(isPaused){
-        console.log("paused");
         if(io.eio.clientsCount !== 0){
             isPaused = false;
         }
     }
     else if(prevClientCount>0 && io.eio.clientsCount === 0){
         console.log("Pausing in 10");
-        pauseInTime = Date.now() + 10000;
+        pauseInTime = Date.now() + 1200000;
         prevClientCount = 0;
     }
     else if(pauseInTime !== null && io.eio.clientsCount === 0){
         if(Date.now() > pauseInTime){
-            console.log("Stopped the loop");
+            console.log("Stopping api calls due to inactivity");
             isPaused = true;
         }
         prevClientCount = io.eio.clientsCount;
     }else{
-        console.log("active");
         prevClientCount = io.eio.clientsCount;
-        isPaused = false;
         pauseInTime = null;
         emitDroneData(await fetchDroneData());
         emitViolators(await Violation.find().sort({createdAt: -1}));

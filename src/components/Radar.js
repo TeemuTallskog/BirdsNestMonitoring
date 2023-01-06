@@ -10,13 +10,25 @@ const Radar = props =>{
         ctx.beginPath();
         ctx.arc(250, 250, 100, 0, 2*Math.PI);
         ctx.stroke();
-        if(props.drones) {
+        if(props.drones.length > 0) {
             props.drones.forEach((drone) => {
                 drawDrone(drone, ctx);
             });
+        }else{
+            drawFetchingDataText(ctx);
         }
     }
 
+    const drawFetchingDataText = (ctx) =>{
+        const fontSize = 20, fontFamily = 'Arial', color = 'black', textAlign = 'center', textBaseline = 'top';
+        ctx.beginPath();
+        ctx.font = fontSize + 'px ' + fontFamily;
+        ctx.textAlign = textAlign;
+        ctx.textBaseline = textBaseline;
+        ctx.fillStyle = color;
+        ctx.fillText("Connecting...", 250, 240);
+        ctx.stroke();
+    }
     const drawDrone = (drone,ctx) => {
         ctx.fillStyle = getDistanceToBirdsNest(drone) > 100 ? '#00FF00' : '#FF0000';
         ctx.beginPath();
