@@ -23,9 +23,35 @@ server.listen(PORT, err=>{
 
 mongooseInit();
 
+let isPaused = false;
+let prevClientCount = 1;
+let pauseInTime = null;
 setInterval(async ()=>{
-    emitDroneData(await fetchDroneData());
-    emitViolators(await Violation.find().sort({createdAt: -1}));
+    if(isPaused){
+        console.log("paused");
+        if(io.eio.clientsCount !== 0){
+            isPaused = false;
+        }
+    }
+    else if(prevClientCount>0 && io.eio.clientsCount === 0){
+        console.log("Pausing in 10");
+        pauseInTime = Date.now() + 10000;
+        prevClientCount = 0;
+    }
+    else if(pauseInTime !== null && io.eio.clientsCount === 0){
+        if(Date.now() > pauseInTime){
+            console.log("Stopped the loop");
+            isPaused = true;
+        }
+        prevClientCount = io.eio.clientsCount;
+    }else{
+        console.log("active");
+        prevClientCount = io.eio.clientsCount;
+        isPaused = false;
+        pauseInTime = null;
+        emitDroneData(await fetchDroneData());
+        emitViolators(await Violation.find().sort({createdAt: -1}));
+    }
 }, 2000)
 
 /**
