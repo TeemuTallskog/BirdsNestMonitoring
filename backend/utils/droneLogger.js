@@ -1,5 +1,4 @@
 const axios  = require("axios");
-//const xmlFile = require("../src/components/test.xml");
 const {XMLParser} = require('fast-xml-parser');
 const Violation  = require( "../models/Violation");
 const parser = new XMLParser();

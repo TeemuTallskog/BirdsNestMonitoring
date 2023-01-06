@@ -1,13 +1,24 @@
 import Table from 'react-bootstrap/Table';
-import moment from 'moment';
 
 function ViolatorsList(props){
+
+    const elapsedTime = (date) =>{
+        const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+        let interval = seconds / 60;
+        if(interval > 1){
+            if(interval < 2){
+                return "a minute ago"
+            }
+            return Math.floor(interval) + " minutes ago"
+        }
+        return Math.floor(seconds) + " seconds ago";
+    }
 
     const generateTable = props.violators && props.violators.map((item) => {
         return(
             <tbody>
                 <tr>
-                    <td>{moment(item.createdAt).fromNow()}</td>
+                    <td>{elapsedTime(item.createdAt)}</td>
                     <td>{parseFloat(item.distance).toFixed(2)} Meters</td>
                     <td>{item.firstName}</td>
                     <td>{item.lastName}</td>
