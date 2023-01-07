@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 8080;
 const app = express();
 const server = http.createServer(app);
 const path = require('path');
+const serverHasBeenInactive = require('./utils/inactivityCheck');
 
 app.use(express.static(path.join(__dirname,'..','build')));
 
@@ -27,6 +28,7 @@ io.on('connection',(socket)=>{
     socket.join('drone-data');
     socket.on('disconnect', (reason)=>console.log("client disconnected " + reason));
 })
+
 server.listen(PORT, err=>{
     if(err) console.log(err);
     console.log('Server running on Port ', PORT);
@@ -35,37 +37,26 @@ server.listen(PORT, err=>{
 mongooseInit();
 
 let isPaused = false;
-let prevClientCount = 1;
-let pauseInTime = null;
-setInterval(async ()=>{
-    if(isPaused){
-        if(io.eio.clientsCount !== 0){
-            isPaused = false;
-        }
+
+/**
+ * Collects drone data from the api every 2 seconds, analyzes it emits the data to the client along with the violators list.
+ * If no client has connected to the server for 20 minutes the API calls and data collection will be paused.
+ */
+setInterval( async () =>{
+    if(!isPaused && serverHasBeenInactive(io.eio.clientsCount)){
+        isPaused = true;
+        console.log("API calls were paused due to inactivity");
     }
-    else if(prevClientCount>0 && io.eio.clientsCount === 0){
-        console.log("Pausing in 10");
-        pauseInTime = Date.now() + 1200000;
-        prevClientCount = 0;
+    if(io.eio.clientsCount > 0){
+        isPaused = false;
     }
-    else if(pauseInTime !== null && io.eio.clientsCount === 0){
-        if(Date.now() > pauseInTime){
-            console.log("Stopping api calls due to inactivity");
-            isPaused = true;
-        }
-        prevClientCount = io.eio.clientsCount;
-    }else{
-        prevClientCount = io.eio.clientsCount;
-        pauseInTime = null;
-        emitDroneData(await fetchDroneData());
-        emitViolators(await Violation.find().sort({createdAt: -1}));
+    if(!isPaused){
+        emitDroneData(await fetchDroneData()); //Fetches drone data from the API, analyzes it for violations and emits the drone data to client.
+        emitViolators(await Violation.find().sort({createdAt: -1})); //Fetches a list of violations and sorts it by date, then emits it to client.
     }
 }, 2000)
 
-/**
- * emits recieved drone data to client
- * @param droneData
- */
+
 function emitDroneData(droneData){
     io.to('drone-data').emit('drones', droneData);
 }
